@@ -1,0 +1,59 @@
+---
+title: Does Vitamin C Intake Has a Positive Effect on Tooth Growth In the Guinea Pig population?
+author: "Han-Yu Hsieh"
+date: "11/07/2020"
+output:
+  html_document: default
+  pdf_document: 
+    fig_height: 4
+---
+### Overview
+I use ToothGrowth data set in the R datasets package to answer this question. This data set contains the result from an experiment studying the effect of vitamin C on tooth growth in 60 Guinea pigs. Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, (orange juice or ascorbic acid), and the study team measured the tooth length of each animal as the result.
+
+### Exploratory Analysis
+```{r results='hide',message=FALSE}
+library(ggplot2);library(datasets);library(dplyr)
+```
+```{r}
+tooth_plot <- ggplot(ToothGrowth, aes(x=supp, y=len))
+tooth_plot+theme_bw()+geom_boxplot(aes(fill = supp))+facet_grid(.~dose)+
+    xlab("Delivery Method")+ylab("Length")+labs(title = "Figure 1") 
+```
+As we can see from Figure 1, it seems that increasing vitamin C intake has a positive effect on tooth growth in both delivery methods. Therefore, for the next step, I use a two-sample t-test to verify this theory.
+
+### Hypothesis testing for the dosage
+#Test 1: I want to compare the differences between the average tooth length in vitamin C intake 0.5mg/day versus intake 1mg/day. 
+Ho: difference in tooth length in vitamin C intake 0.5 and 1 mg/day = 0
+Ha: difference in tooth length in vitamin C intake 0.5 and 1 mg/day not equal to 0
+```{r}
+len_for_0.5 <- filter(ToothGrowth, dose == 0.5)[,1]
+len_for_1 <- filter(ToothGrowth, dose == 1)[,1]
+len_for_2 <- filter(ToothGrowth, dose == 2)[,1]
+t.test(len_for_0.5, len_for_1)
+```
+As we can see, the p-value for test 1 is significantly low, so we have enough evidence to reject the null hypothesis and confidently accept that the difference in tooth length in vitamin C intake 0.5 and 1 mg/day is not equal to 0.
+
+
+#Test 2: I want to see whether there are differences between the average tooth length in vitamin C intake 0.5mg/day versus intake 2mg/day.
+Ho: difference in tooth length in vitamin C intake 0.5 and 1 mg/day = 0
+Ha: difference in tooth length in vitamin C intake 0.5 and 2 mg/day not equal to 0
+```{r}
+t.test(len_for_0.5, len_for_2)
+```
+The p-value of test 2 is even lower than test 1. Therefore, we can accept the alternative hypothesis, in which there is a significant difference between the average tooth length in vitamin C intake 0.5mg/day versus intake 2mg/day.
+
+### Hypothesis testing for the delivery method
+#Test 3: I want to compare the differences between the average tooth length in intaking orange juice versus ascorbic acid. 
+Ho: difference in tooth length in intaking orange juice and ascorbic acid = 0
+Ha: difference in tooth length in intaking orange juice and ascorbic acid not equal to 0
+```{r}
+len_for_oj <- filter(ToothGrowth, supp == "OJ")[,1]
+len_for_vc <- filter(ToothGrowth, supp == "VC")[,1]
+t.test(len_for_oj,len_for_vc)
+```
+As we can see from the result, the p-value of test 3 is 0.06063 so that we can reject the null hypothesis and accept the alternative hypothesis, which there is a difference in tooth length in intaking orange juice and ascorbic acid.
+
+### Conclusion
+From test 1 and test 2 results, we can say that there is a significant difference between the average tooth length in vitamin C intake 0.5mg/day versus intake 1mg/day as well as in vitamin C intake 0.5mg/day versus intake 2mg/day; from test 3 result, there is a difference in tooth length in intaking orange juice and ascorbic acid. Therefore, from ToothGrowth data set, vitamin C intake has a positive effect on tooth growth in the Guinea pig population.
+
+reference:https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/ToothGrowth.html
