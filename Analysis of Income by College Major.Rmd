@@ -1,0 +1,76 @@
+---
+title: "Analysis of Income by College Major"
+author: "Han-Yu Hsieh"
+date: "12/10/2020"
+output: html_document
+---
+# Overview 
+Looking at the college data set, I am interested in exploring the relationship between college major category and income(outcome). There is the main question of this analysis: Do different college major categories affect incoming? This is also the Coursera course project from Data Science: Statistics and Machine Learning Specialization by Johns Hopkins University.
+
+## 1.1 Loading packages and reviewing the data
+```{r results='hide', message = FALSE, warning = FALSE}
+library(collegeIncome);library(tidyr)
+library(ggplot2);library(dplyr)
+data(college);head(college);unique(college$major_category)
+```
+## 2.1 Exploratory Data Analysis
+```{r results='hide', message = FALSE, warning = FALSE}
+median_earing_major <- college %>% 
+  group_by(major_category) %>%
+  summarize(mean_median = mean(median),
+            mean_25 = mean(p25th),
+            mean_75 = mean(p75th)) %>%
+  gather(key = "variable", value = "value" , -major_category)
+```
+```{r}
+ggplot(median_earing_major, aes(major_category, value, group = variable, color = variable)) +
+  geom_point() + geom_line() + 
+  theme(axis.text.x = element_text(size = 6, angle = 90))
+```
+
+From the plot, the three different income measures(25th, 50th, and 75th percentile of income among those reporting income in the survey) for each major category have a similar trend, so I take the median as the outcome in my regression model.
+
+## 2.2 Data Reviewing
+```{r}
+table(college$major_category)
+#There is only one major falls into the "Interdisciplinary" category. It's better to remove it.
+college <- college %>%
+  filter(major_category != "Interdisciplinary")
+```
+
+## 3.1 Linear regression
+```{r}
+test_1 <- college %>% 
+  select(-c("rank","major_code","major","total","sample_size","p25th","p75th"))
+
+earing_median <- ggplot(test_1, aes(major_category, median, color = major_category))
+
+earing_median + geom_point(size = 2) + theme(axis.text.x = element_text(size = 6, angle = 90))
+
+lmfit_1 <- lm(median ~ major_category, test_1)
+summary(lmfit_1)$coef
+```
+
+(reference category is Agriculture & Natural Resources) Holding constant gender distributions and skill category distributions, we don’t see much effect of major category. 
+
+```{r}
+test_1 <- within(test_1, major_category <- as.factor(major_category))
+test_2 <- relevel(test_1$major_category, "Business")
+lmfit_3 <- lm(median ~ test_2, data = test_1) 
+summary(lmfit_3)$coef
+```
+
+In particular, it is important to consider the multiple hypothesis testing issue here as we have many different major categories. So, I used Business(the highest income) as the reference category. Again, we really don’t see much of a category effect on income. 
+
+```{r}
+#checking regression assumptions are met with diagnostic plotting (lmfit_1)
+resid <- residuals(lmfit_1)
+fitted <- fitted.values(lmfit_1)
+plot(fitted, resid, xlab = "Predicted values" , ylab = "Residuals")
+abline(h = 0, col = "red", lty = "dashed")
+```
+
+There is one outlier, but that is unlikely to have changed the overall result. Normality assumptions don’t seem far off (approximately), and heteroskedasticity doesn’t seem to be an issue. I believe the regression model(lmfit_1) met the diagnostic assumptions.
+
+# Conclusion
+From the regression model(lmfit_1), there does not seem to be an effect of the college major category on the median income in this analysis. 
