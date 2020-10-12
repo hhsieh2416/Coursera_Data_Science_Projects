@@ -1,4 +1,4 @@
-Coursera course projects from Data Science: Statistics and Machine Learning Specialization by Johns Hopkins University
+Data Science: Statistics and Machine Learning Specialization course projects by Johns Hopkins University
 
 # [Statistical Inference Project 1](https://rpubs.com/hhsieh2416/638184)
 - Investigate the exponential distribution in R and compare it with the Central Limit Theorem
