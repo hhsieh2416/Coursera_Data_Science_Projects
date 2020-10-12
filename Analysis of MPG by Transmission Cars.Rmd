@@ -1,0 +1,68 @@
+---
+title: Analysis of Miles per Gallon Performance between Automatic and Manual Transmission
+  Cars
+author: "Han-Yu Hsieh"
+date: "04/10/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+# Overview 
+Looking at mtcars data set, I am interested in exploring the relationship between two types of transmissions cars(automatic or manual) and miles per gallon(MPG)(outcome).There are two main questions of this analysis: 1. Is an automatic or manual transmission better for MPG? 2. Quantify the MPG difference between automatic and manual transmissions? This is also the Coursera course project from Data Science: Statistics and Machine Learning Specialization by Johns Hopkins University.
+
+## 1.1 Loading packages and reviewing the data
+```{r results='hide', message = FALSE, warning = FALSE}
+library(ggplot2); library(tidyr); library(dplyr)
+head(mtcars)
+?mtcars
+#I learned that "am" represents	Transmission(0 = automatic, 1 = manual)
+mtcars.named<-mutate(mtcars,car.name=row.names(mtcars))
+head(mtcars.named)
+```
+
+## 2.1 Exploratory data analysis
+```{r}
+Figure1 <- ggplot(mtcars.named, aes(x = car.name, y = mpg, group = factor(am), color = factor(am)))+
+  geom_point()+geom_line()+
+  theme(axis.text.x = element_text(size = 6, angle = 90))
+Figure1  
+```
+
+From Figure1, it seems like manual cars(am=1) have higher mpg. Therefore, it is worth investigating the question.
+
+
+## 3.1 Leaner Regression Models
+```{r}
+mpg_lm1 <- lm(am ~ mpg, mtcars.named)
+summary(mpg_lm1)$coeff
+#check regression assumptions are met with diagnostic plotting (mpg_lm1)
+resid_liner <- residuals(mpg_lm1)
+fitted_liner <- fitted.values(mpg_lm1)
+plot(fitted_liner, resid_liner, xlab = "Predicted values" , ylab = "Residuals")
+abline(h = 0, col = "red", lty = "dashed")
+```
+
+## 3.2 Logistic Regression Models
+```{r}
+mpg_lm_logistic <- glm(mtcars.named$am ~ mtcars.named$mpg, family = "binomial")
+summary(mpg_lm_logistic)$coeff
+#check regression assunptions(mpg_lm_logistic)
+resid_logistic <- residuals(mpg_lm_logistic)
+fitted_logistic <- fitted.values(mpg_lm_logistic)
+plot(fitted_logistic, resid_logistic, xlab = "Predicted values" , ylab = "Residuals") 
+abline(h = 0, col = "red", lty = "dashed")
+```
+
+From the linear regression plot and the logistic regression plot, normality assumptions don't seem far off, and heteroskedasticity doesn't seem to be an issue. Therefore, I can say manual transmission cars have better MPG performance because of my linear(p-value = 0.000285) and logistic regression(p-value = 0.00751) model for the mtcars data.
+
+## 4.1 Fitted values from the logistic regression model
+```{r}
+plot(mtcars.named$mpg, mpg_lm_logistic$fitted, pch = 15, col = "blue" ,
+     xlab = "mpg", ylab = "Prob of Manual cars")
+exp(mpg_lm_logistic$coeff)
+```
+
+The coefficient means 35% increase of the chance of being manual cars when there is 1 mpg increase.
+
+# Conclusion
+From the linear(p-value = 0.000285) and logistic regression(p-value = 0.00751) model for the mtcars data, I can say manual transmission cars have better MPG performance. Also, when there is 1 mpg increase, it increases 35% of the chance of being a manual car. 
