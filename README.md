@@ -16,6 +16,6 @@ Data Science: Statistics and Machine Learning Specialization course projects by 
 - Quantify the MPG difference between automatic and manual transmissions?
 - Mtcars data set in R
 
-# [Practical Machine Learning Project] (https://rpubs.com/hhsieh2416/691379)
+# [Practical Machine Learning Project](https://rpubs.com/hhsieh2416/691379)
 -  Using data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants builds a model to predict the possible 6 exercise activities. 
 -  The data for this project come from this source: http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har
